@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      input { width: 40em; margin: 10px;}
+      textarea { width: 40em; height: 40em; resize: none; margin: 10px;}
+      button { width: 40em; margin: 10px;}
+    </style>
+  </head>
+  <body>
+    <div>
+      <input readonly type="text" id="email">
+    </div>
+    <div>
+      <textarea readonly id="publicKey"></textarea>
+    </div>
+    <div>
+      <button id="generateKey">Generate new key</button>
+    </div>
+  </body>
+  <script src="openpgp.min.js"></script>
+  <script src="options.js"></script>
+</html>
