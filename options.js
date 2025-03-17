@@ -4,42 +4,46 @@ let email = document.getElementById('email');
 let publicKey = document.getElementById('publicKey');
 let generateKey = document.getElementById('generateKey');
 
-function constructOptions() {
-	  chrome.identity.getProfileUserInfo(function(userInfo) {
-		    if (userInfo.email) {
-            email.value = userInfo.email;
-            generateKey.disabled = false;
-		    } else {
-			      message('User is not logged into Chrome.');
-            generateKey.disabled = true;
-		    }
-	  });
+async function constructOptions() {
+    const data = await browser.storage.sync.get(['email', 'pubKey']);
+    email.value = data.email || '';
+    publicKey.value = data.pubKey || '';
 
-    chrome.storage.sync.get('pubKey', function(data) {
-        publicKey.value = data.pubKey;
-    });
+    generateKey.addEventListener('click', async function() {
+        if (!email.value || !email.value.includes('@')) {
+            alert('Please enter a valid email address.');
+            return;
+        }
 
-    generateKey.addEventListener('click', function() {
         publicKey.value = 'Generating...';
 
-        var manifest = chrome.runtime.getManifest();
-        var keyName = [manifest.name, manifest.version, Date.now()].join(' ');
+        try {
+            const manifest = browser.runtime.getManifest();
+            const keyName = [manifest.name, manifest.version, Date.now()].join(' ');
 
-        var options = {
-            userIds: [{ name: keyName, email: email.value }],
-            numBits: 2048,
-            passphrase: ''
-        };
+            const options = {
+                userIds: [{ name: keyName, email: email.value }],
+                numBits: 2048,
+                passphrase: ''
+            };
 
-        openpgp.generateKey(options).then(function(data) {
-            var privKey = data.privateKeyArmored;
-            var pubKey = data.publicKeyArmored;
-            chrome.storage.sync.set({ pubKey: pubKey, privKey: privKey}, function() {
-                publicKey.value = pubKey;
-                console.log('Key saved.');
+            const data = await openpgp.generateKey(options);
+            const privKey = data.privateKeyArmored;
+            const pubKey = data.publicKeyArmored;
+
+            await browser.storage.sync.set({ 
+                email: email.value,
+                pubKey: pubKey,
+                privKey: privKey
             });
-        });
-    })
+
+            publicKey.value = pubKey;
+            console.log('Key saved.');
+        } catch (err) {
+            console.error('Error generating key:', err);
+            publicKey.value = 'Error generating key.';
+        }
+    });
 }
 
 constructOptions();

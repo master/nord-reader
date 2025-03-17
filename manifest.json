@@ -1,17 +1,20 @@
 {
+    "manifest_version": 2,
     "name": "Nord Reader",
     "author": "Oleg Smirnov <oleg.smirnov@gmail.com>",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "description": "Nord Reader Extension",
-    "permissions": ["tabs", "storage", "identity.email", "identity", "*://nord.org.ua/*"],
-    "options_page": "options.html",
+    "permissions": ["tabs", "storage", "*://nord.org.ua/*"],
     "background": {
-        "scripts": ["background.js"],
-        "persistent": false
+        "scripts": ["background.js"]
+    },
+    "options_ui": {
+        "page": "options.html",
+        "browser_style": true
     },
     "content_scripts": [{
         "matches": ["*://nord.org.ua/*"],
-        "js": ["content.js", "openpgp.min.js"],
+        "js": ["content.js", "openpgp.min.js", "browser-polyfill.min.js"],
         "run_at": "document_start"
     }],
     "icons": {
@@ -20,5 +23,10 @@
         "48": "images/icon_48.png",
         "128": "images/icon_128.png"
     },
-    "manifest_version": 2
+    "browser_specific_settings": {
+        "gecko": {
+            "id": "reader@nord.org.ua",
+            "strict_min_version": "57.0"
+        }
+    }
 }
